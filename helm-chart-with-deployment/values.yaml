@@ -1,0 +1,59 @@
+backend:
+  backend:
+    image:
+      repository: umerjamil16/test
+      tag: backend2
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  replicas: 2
+  type: ClusterIP
+backendPreview:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  type: ClusterIP
+database:
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
+  postgres:
+    image:
+      repository: postgres
+      tag: latest
+  replicas: 1
+  type: ClusterIP
+databaseConfig:
+  postgresDb: mydatabase
+  postgresEndpoint: database
+  postgresPort: "5432"
+databaseSecret:
+  postgresPassword: "cGFzc3dvcmQ="
+  postgresUser: "ZGF0YWJhc2VfdXNlcg=="
+frontend:
+  frontend:
+    image:
+      repository: umerjamil16/test
+      tag: frontend2
+  ports:
+  - nodePort: 30100
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  replicas: 2
+  type: NodePort
+kubernetesClusterDomain: cluster.local
+preview:
+  ports:
+  - nodePort: 30101
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  type: NodePort
+pvc:
+  postgresPvClaim:
+    storageClass: standard
+    storageRequest: 3Gi

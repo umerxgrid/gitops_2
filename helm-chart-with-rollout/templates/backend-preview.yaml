@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-preview
+  labels:
+  {{- include "helm-chart.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.backendPreview.type }}
+  selector:
+    app: backend
+  {{- include "helm-chart.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.backendPreview.ports | toYaml | nindent 2 -}}

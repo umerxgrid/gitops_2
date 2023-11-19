@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "helm-chart.fullname" . }}-database
+  labels:
+    app: database
+  {{- include "helm-chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.database.replicas }}
+  selector:
+    matchLabels:
+      app: database
+  serviceName: ""
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_USER
+              name: {{ include "helm-chart.fullname" . }}-database-secret
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              key: POSTGRES_DB
+              name: {{ include "helm-chart.fullname" . }}-database-config
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_PASSWORD
+              name: {{ include "helm-chart.fullname" . }}-database-secret
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.database.postgres.image.repository }}:{{ .Values.database.postgres.image.tag
+          | default .Chart.AppVersion }}
+        name: postgres
+        ports:
+        - containerPort: 5432
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: pv-data
+      volumes:
+      - name: pv-data
+        persistentVolumeClaim:
+          claimName: {{ include "helm-chart.fullname" . }}-postgres-pv-claim
+  updateStrategy: {}

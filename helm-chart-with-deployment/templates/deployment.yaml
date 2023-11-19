@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helm-chart.fullname" . }}-backend
+  labels:
+    app: backend
+  {{- include "helm-chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      app: backend
+    {{- include "helm-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: backend
+      {{- include "helm-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              key: POSTGRES_ENDPOINT
+              name: {{ include "helm-chart.fullname" . }}-database-config
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: POSTGRES_PORT
+              name: {{ include "helm-chart.fullname" . }}-database-config
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_USER
+              name: {{ include "helm-chart.fullname" . }}-database-secret
+        - name: POSTGRES_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: POSTGRES_DB
+              name: {{ include "helm-chart.fullname" . }}-database-config
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_PASSWORD
+              name: {{ include "helm-chart.fullname" . }}-database-secret
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.backend.backend.image.repository }}:{{ .Values.backend.backend.image.tag
+          | default .Chart.AppVersion }}
+        name: backend
+        ports:
+        - containerPort: 8080
+        resources: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helm-chart.fullname" . }}-frontend
+  labels:
+    app: frontend
+  {{- include "helm-chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      app: frontend
+    {{- include "helm-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: frontend
+      {{- include "helm-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.frontend.frontend.image.repository }}:{{ .Values.frontend.frontend.image.tag
+          | default .Chart.AppVersion }}
+        name: frontend
+        ports:
+        - containerPort: 3000
+        resources: {}

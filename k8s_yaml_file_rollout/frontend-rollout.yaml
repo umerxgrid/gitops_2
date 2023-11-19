@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: umerjamil16/test:frontend2
+        ports:
+        - containerPort: 3000
+  strategy:
+    blueGreen: 
+      activeService: frontend
+      previewService: frontend-preview
+      autoPromotionEnabled: true
+
