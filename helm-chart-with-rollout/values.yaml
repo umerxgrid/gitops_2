@@ -2,7 +2,7 @@ backend:
   backend:
     image:
       repository: umerjamil16/test
-      tag: backend1
+      tag: backend2
   ports:
   - port: 8080
     protocol: TCP
@@ -37,7 +37,7 @@ frontend:
   frontend:
     image:
       repository: umerjamil16/test
-      tag: frontend1
+      tag: frontend2
   ports:
   - nodePort: 30100
     port: 3000
